@@ -1,9 +1,11 @@
 package com.yantas.pe.controller;
 
+import com.yantas.pe.exception.ResourceNotFoundException;
 import com.yantas.pe.model.dto.ClientDto;
 import com.yantas.pe.model.entity.Client;
 import com.yantas.pe.model.payload.MessageResponse;
 import com.yantas.pe.service.IClientService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -23,21 +25,17 @@ public class ClientController {
     public ResponseEntity<?> showAll() {
         List<Client> getList = clientService.listAll();
         if(getList == null || getList.isEmpty()) {
-            return new ResponseEntity<>(MessageResponse
-                    .builder()
-                    .message("No hay registros en la tabla clients.")
-                    .object(null)
-                    .build(), HttpStatus.OK);
+            throw new ResourceNotFoundException("clients"); // Excepción personalizada
         }
         return new ResponseEntity<>(MessageResponse
                 .builder()
                 .message("Se encontraron los siguientes registros.")
                 .object(getList)
-                .build(), HttpStatus.METHOD_NOT_ALLOWED);
+                .build(), HttpStatus.OK);
     }
 
     @PostMapping("client")
-    public ResponseEntity<?> create(@RequestBody ClientDto clientDto) {
+    public ResponseEntity<?> create(@RequestBody @Valid ClientDto clientDto) {
         Client clientSave = null;
         try {
             clientSave = clientService.save(clientDto);
@@ -64,7 +62,7 @@ public class ClientController {
     }
 
     @PutMapping("client/{id}")
-    public ResponseEntity<?> update(@RequestBody ClientDto clientDto, @PathVariable Integer id) {
+    public ResponseEntity<?> update(@RequestBody @Valid ClientDto clientDto, @PathVariable Integer id) {
         Client clientUpdate = null;
         try {
             if(clientService.existsById(id)){
@@ -84,11 +82,7 @@ public class ClientController {
                         .object(clientDto)
                         .build(), HttpStatus.CREATED);
             } else {
-                return new ResponseEntity<>(MessageResponse
-                        .builder()
-                        .message("El registro que intentó actualizar no se encuentra en la base de datos.")
-                        .object(null)
-                        .build(), HttpStatus.NOT_FOUND);
+                throw new ResourceNotFoundException("client", "id", id); // Excepción personalizada
             }
         } catch (DataAccessException e) {
             return new ResponseEntity<>(MessageResponse
@@ -117,11 +111,7 @@ public class ClientController {
     public ResponseEntity<?> showById(@PathVariable Integer id) {
         Client client = clientService.findById(id);
         if(client == null) {
-            return new ResponseEntity<>(MessageResponse
-                    .builder()
-                    .message("El registro que intenta buscar no existe.")
-                    .object(null)
-                    .build(), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("client", "id", id); // Excepción personalizada
         }
         return new ResponseEntity<>(MessageResponse
                 .builder()
