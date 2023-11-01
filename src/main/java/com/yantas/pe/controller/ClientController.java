@@ -1,5 +1,6 @@
 package com.yantas.pe.controller;
 
+import com.yantas.pe.exception.BadRequestException;
 import com.yantas.pe.exception.ResourceNotFoundException;
 import com.yantas.pe.model.dto.ClientDto;
 import com.yantas.pe.model.entity.Client;
@@ -85,11 +86,7 @@ public class ClientController {
                 throw new ResourceNotFoundException("client", "id", id); // Excepción personalizada
             }
         } catch (DataAccessException e) {
-            return new ResponseEntity<>(MessageResponse
-                    .builder()
-                    .message(e.getMessage())
-                    .object(null)
-                    .build(), HttpStatus.METHOD_NOT_ALLOWED);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -100,10 +97,7 @@ public class ClientController {
             clientService.delete(clientDelete);
             return new ResponseEntity<>(clientDelete, HttpStatus.NO_CONTENT);
         } catch (DataAccessException e) {
-            return new ResponseEntity<>(MessageResponse.builder()
-                    .message(e.getMessage())
-                    .object(null)
-                    .build(), HttpStatus.METHOD_NOT_ALLOWED);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
