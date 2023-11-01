@@ -44,4 +44,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handlerException(Exception exception,
+                                                                  WebRequest webRequest) {
+        ApiResponse apiResponse = new ApiResponse(exception.getMessage(),
+                webRequest.getDescription(false)); // Solo devuelve la URI y omite otros datos sensibles.
+        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }
